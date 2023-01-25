@@ -24,7 +24,7 @@ domain                                  : ${params.domain}
 conceptType                             : ${params.conceptType}
 controlIndexDate                        : ${params.controlIndexDate}
 
-sqlite_db                               : ${params.sqlite_db}s
+sqlite_db                               : ${params.sqlite_db}
 database_dbms                           : ${params.database_dbms}
 database_cdm_schema                     : ${params.database_cdm_schema}
 database_cohort_schema                  : ${params.database_cohort_schema}
