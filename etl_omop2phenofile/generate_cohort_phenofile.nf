@@ -312,6 +312,9 @@ workflow {
     \nPlease use --database_cohort_schema."
   }
 
+  input_specifications = Channel.fromPath(params.input_specifications, checkIfExists: true)
+  type_specifications = Channel.value(params.type_specifications)
+
   // sub-workflow
   lifebitai_generate_cohort_phenofile(
     input_specifications,
