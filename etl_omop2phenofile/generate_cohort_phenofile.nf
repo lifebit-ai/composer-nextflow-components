@@ -210,18 +210,27 @@ process generate_phenofile {
 workflow lifebitai_generate_cohort_phenofile {
 
   take:
-    codelist_specifications
-    cohort_specifications
+    input_specifications
+    type_specifications
 
   main:
 
+    if (type_specifications != 'codelist') {
+      exit 1, "You have not supplied a valid type of specification.\
+      \nPlease use 'codelist' or 'cohort' only."
+    }
+    if (type_specifications != 'codelist' & !(!!params.conceptType & !!params.domain & !!params.controlIndexDate)) {
+      exit 1, "When using a codelist specfication you must also specity a conceptType, a domain, and an index date for controls."
+    }
+
     // Define Channels only needed inside the sub-workflow
+    if(type_specifications == 'codelist'){
+      concept_type = Channel.value(params.conceptType)
+      domain = Channel.value(params.domain)
+      control_group_occurrence = Channel.value(params.controlIndexDate)
+    }
     covariate_specification = params.covariateSpecifications ? Channel.fromPath(params.covariateSpecifications) : Channel.empty()
-    concept_type = params.codelistSpecifications ? Channel.value(params.conceptType) : Channel.empty()
-    domain = params.codelistSpecifications ? Channel.value(params.domain) : Channel.empty()
-    control_group_occurrence = params.codelistSpecifications ? Channel.value(params.controlIndexDate) : Channel.empty()
-    db_jars = Channel
-      .fromPath("${projectDir}/${params.path_to_db_jars}", type: 'file', followLinks: false)
+    db_jars = Channel.fromPath("${projectDir}/${params.path_to_db_jars}", type: 'file', followLinks: false)
     sqlite_db_cohorts = Channel.fromPath(params.sqlite_db)
     pheno_label = Channel.value(params.pheno_label)
     convert_plink = Channel.value(params.convert_plink)
@@ -231,9 +240,9 @@ workflow lifebitai_generate_cohort_phenofile {
     retrieve_parameters()
 
     // generate cohort specs
-    if (params.codelistSpecifications) {
+    if (type_specifications == 'codelist') {
       generate_user_spec_from_codelist(
-        codelist,
+        input_specifications,
         db_jars,
         retrieve_parameters.out.connection_details,
         sqlite_db_cohorts,
@@ -241,12 +250,16 @@ workflow lifebitai_generate_cohort_phenofile {
         domain,
         control_group_occurrence
       )
-      cohort_specifications = generate_user_spec_from_codelist.out.cohort_specification_for_cohorts
+      cohort_specs = generate_user_spec_from_codelist.out.cohort_specification_for_cohorts
+    }
+
+    if (type_specifications == 'cohort') {
+      cohort_specs = input_specifications
     }
 
     // Obtain a OHDSI JSON cohort definition using a user-made input JSON specification file
     generate_cohort_jsons_from_user_spec(
-      cohort_specifications,
+      cohort_specs,
       db_jars,
       retrieve_parameters.out.connection_details,
       sqlite_db_cohorts
@@ -256,7 +269,7 @@ workflow lifebitai_generate_cohort_phenofile {
     generate_cohorts_in_db(
       retrieve_parameters.out.connection_details,
       generate_cohort_jsons_from_user_spec.out.cohort_json_for_cohorts.collect(),
-      cohort_specifications,
+      cohort_specs,
       db_jars,
       sqlite_db_cohorts
     )
@@ -290,16 +303,6 @@ workflow {
     exit 1, "You have not supplied a file containing details of the covariates to include in the phenofile.\
     \nPlease use --covariateSpecifications."
   }
-  if (!params.cohortSpecifications & !params.codelistSpecifications) {
-    exit 1, "You have not supplied a file containing user-made cohort(s) specification or a codelist.\
-    \nPlease use --cohortSpecifications or --codelistSpecifications."
-  }
-  if (!!params.cohortSpecifications & !!params.codelistSpecifications) {
-    exit 1, "Choose either a cohort specifaction or a codelist specfication."
-  }
-  if (!!params.codelistSpecifications & !(!!params.conceptType & !!params.domain & !!params.controlIndexDate)) {
-    exit 1, "When using a codelist specfication you must also specity a conceptType, a domain, and an index date for controls."
-  }
   if (!params.database_cdm_schema) {
     exit 1, "You have not supplied the database cdm schema name.\
     \nPlease use --database_cdm_schema."
@@ -309,13 +312,9 @@ workflow {
     \nPlease use --database_cohort_schema."
   }
 
-  // Setting up input channels
-  cohort_specifications = params.cohortSpecifications ? Channel.fromPath(params.cohortSpecifications) ? Channel.empty()
-  codelist_specifications = params.codelistSpecifications ? Channel.fromPath(params.codelistSpecifications) : Channel.empty()
-
   // sub-workflow
   lifebitai_generate_cohort_phenofile(
-    codelist_specifications,
-    cohort_specifications
+    input_specifications,
+    type_specifications
   )
 }
