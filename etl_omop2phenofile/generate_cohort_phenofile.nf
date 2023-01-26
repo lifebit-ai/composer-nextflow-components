@@ -289,7 +289,7 @@ workflow lifebitai_generate_cohort_phenofile {
     )
   
   emit:
-    phenofile = generate_phenofile.out.phenofile
+    generate_phenofile.out.phenofile
 
 }
 
