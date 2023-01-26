@@ -313,8 +313,7 @@ workflow {
   }
 
   input_specifications = Channel.fromPath(params.input_specifications, checkIfExists: true)
-  type_specifications = Channel.value(params.type_specifications)
-  println "before sub-workflow"
+  type_specifications = params.type_specifications
 
   // sub-workflow
   lifebitai_generate_cohort_phenofile(
