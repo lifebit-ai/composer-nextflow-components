@@ -18,8 +18,6 @@ User                                    : ${workflow.userName}
 phenofileName                           : ${params.phenofileName}
 
 covariateSpecifications                 : ${params.covariateSpecifications}
-cohortSpecifications                    : ${params.cohortSpecifications}
-codelistSpecifications                  : ${params.cohortSpecifications}
 domain                                  : ${params.domain}
 conceptType                             : ${params.conceptType}
 controlIndexDate                        : ${params.controlIndexDate}
@@ -312,11 +310,7 @@ workflow {
   }
 
   // Setting up input channels
-  if (!!params.cohortSpecifications) {
-    cohort_specifications = Channel.fromPath(params.cohortSpecifications)
-  } else {
-    cohort_specifications = Channel.empty()
-  }
+  cohort_specifications = params.cohortSpecifications ? Channel.fromPath(params.cohortSpecifications) ? Channel.empty()
   codelist_specifications = params.codelistSpecifications ? Channel.fromPath(params.codelistSpecifications) : Channel.empty()
 
   // sub-workflow
