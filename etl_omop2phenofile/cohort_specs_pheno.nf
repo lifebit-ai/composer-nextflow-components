@@ -100,7 +100,7 @@ process generate_cohort_jsons_from_user_spec {
   output:
   path("*json"), emit: cohort_json_for_cohorts
 
-  shell:
+  script:
   """
   ## Make a permanent copy of sqlite file (NB. This is only used in sqlite testing mode)
   mkdir omopdb/
@@ -132,7 +132,7 @@ process generate_cohorts_in_db {
   path("*csv"), emit: cohort_counts
   path("omopdb.sqlite"), emit: sqlite_db_covariates
 
-  shell:
+  script:
   """
   ## Make a permanent copy of sqlite file (NB. This is only used in sqlite testing mode)
   mkdir omopdb/
@@ -160,7 +160,7 @@ process generate_phenofile {
   output:
   path("*phe")
 
-  shell:
+  script:
   """
   Rscript generatePhenofile.R \
     --connection_details=${connection_details} \
