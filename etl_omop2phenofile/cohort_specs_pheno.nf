@@ -88,39 +88,6 @@ process retrieve_parameters {
   '''
 }
 
-process generate_user_spec_from_codelist {
-  publishDir "${params.outdir}/cohorts/user_def", mode: "copy"
-
-  input:
-  each path(codelist)
-  each path(db_jars)
-  each path(connection_details)
-  each path(sqlite_db)
-  val(concept_type)
-  val(domain)
-  val(control_group_occurrence)
-
-  output:
-  path("*json"), emit: cohort_specification_for_cohorts
-
-  shell:
-  """
-  ## Make a permanent copy of sqlite file (NB. This is only used in sqlite testing mode)
-  ls -la
-  mkdir omopdb/
-  chmod 0766 ${sqlite_db}
-  cp ${sqlite_db} omopdb/omopdb.sqlite
-  mv omopdb/omopdb.sqlite .
-  Rscript simpleCohortSpecFromCsv.R \
-    --codelist=${codelist} \
-    --connection_details=${connection_details} \
-    --db_jars=${db_jars} \
-    --concept_types=${concept_type} \
-    --domain=${domain} \
-    --control_group_occurrence=${control_group_occurrence}
-  """
-}
-
 process generate_cohort_jsons_from_user_spec {
   publishDir "${params.outdir}/cohorts/json", mode: "copy"
 
@@ -207,7 +174,7 @@ process generate_phenofile {
   """
 }
 
-workflow lifebitai_generate_cohort_phenofile {
+workflow lifebitai_phenofile_from_cohort_specs {
 
   take:
     cohort_specifications
@@ -215,7 +182,7 @@ workflow lifebitai_generate_cohort_phenofile {
   main:
 
     covariate_specification = params.covariateSpecifications ? Channel.fromPath(params.covariateSpecifications) : Channel.empty()
-    db_jars = Channel.fromPath("${projectDir}/${params.path_to_db_jars}", type: 'file', followLinks: false)
+    db_jars = Channel.fromPath(params.path_to_db_jars)
     sqlite_db_cohorts = Channel.fromPath(params.sqlite_db)
     pheno_label = Channel.value(params.pheno_label)
     convert_plink = Channel.value(params.convert_plink)
@@ -287,7 +254,7 @@ workflow {
   }
 
   // sub-workflow
-  lifebitai_generate_cohort_phenofile(
+  lifebitai_phenofile_from_cohort_specs(
     cohort_specifications
   )
 }
