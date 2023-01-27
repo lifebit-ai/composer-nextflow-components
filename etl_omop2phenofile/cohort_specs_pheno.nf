@@ -174,7 +174,7 @@ process generate_phenofile {
   """
 }
 
-workflow lifebitai_generate_cohort_phenofile {
+workflow lifebitai_phenofile_from_cohort_specs {
 
   take:
     cohort_specifications
@@ -254,7 +254,7 @@ workflow {
   }
 
   // sub-workflow
-  lifebitai_generate_cohort_phenofile(
+  lifebitai_phenofile_from_cohort_specs(
     cohort_specifications
   )
 }
