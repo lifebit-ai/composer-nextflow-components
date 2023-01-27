@@ -182,7 +182,7 @@ workflow lifebitai_phenofile_from_cohort_specs {
   main:
 
     covariate_specification = params.covariateSpecifications ? Channel.fromPath(params.covariateSpecifications) : Channel.empty()
-    db_jars = Channel.fromPath("${projectDir}/${params.path_to_db_jars}", type: 'file', followLinks: false)
+    db_jars = Channel.fromPath(params.path_to_db_jars)
     sqlite_db_cohorts = Channel.fromPath(params.sqlite_db)
     pheno_label = Channel.value(params.pheno_label)
     convert_plink = Channel.value(params.convert_plink)
