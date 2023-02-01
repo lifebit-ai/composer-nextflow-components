@@ -158,7 +158,7 @@ process generate_phenofile {
   val(phenofile_name)
 
   output:
-  path("*phe")
+  path("*phe"), emit: pheno_file
 
   script:
   """
@@ -222,8 +222,10 @@ workflow lifebitai_phenofile_from_cohort_specs {
       phenofile_name
     )
   
+    pheno_file_out = generate_phenofile.out.pheno_file
+
   emit:
-    generate_phenofile.out
+    pheno_file_out
 
 }
 
