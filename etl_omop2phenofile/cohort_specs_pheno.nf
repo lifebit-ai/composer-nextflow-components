@@ -192,37 +192,38 @@ workflow lifebitai_phenofile_from_cohort_specs {
     retrieve_parameters()
 
     // Obtain a OHDSI JSON cohort definition using a user-made input JSON specification file
-    generate_cohort_jsons_from_user_spec(
-      cohort_specifications,
-      db_jars,
-      retrieve_parameters.out.connection_details,
-      sqlite_db_cohorts
-    )
+    // generate_cohort_jsons_from_user_spec(
+    //   cohort_specifications,
+    //   db_jars,
+    //   retrieve_parameters.out.connection_details,
+    //   sqlite_db_cohorts
+    // )
 
     // Using the cohort definition file(s), write cohort(s) in the OMOP database
-    generate_cohorts_in_db(
-      retrieve_parameters.out.connection_details,
-      generate_cohort_jsons_from_user_spec.out.cohort_json_for_cohorts.collect(),
-      cohort_specifications,
-      db_jars,
-      sqlite_db_cohorts
-    )
+    // generate_cohorts_in_db(
+    //   retrieve_parameters.out.connection_details,
+    //   generate_cohort_jsons_from_user_spec.out.cohort_json_for_cohorts.collect(),
+    //   cohort_specifications,
+    //   db_jars,
+    //   sqlite_db_cohorts
+    // )
 
     // Generate a phenofile using the cohort(s) written to the OMOP database and
     // an input covariate specification
-    generate_phenofile(
-      retrieve_parameters.out.connection_details,
-      generate_cohorts_in_db.out.cohort_table_name,
-      covariate_specification,
-      generate_cohorts_in_db.out.cohort_counts,
-      db_jars,
-      generate_cohorts_in_db.out.sqlite_db_covariates,
-      pheno_label,
-      convert_plink,
-      phenofile_name
-    )
+    // generate_phenofile(
+    //   retrieve_parameters.out.connection_details,
+    //   generate_cohorts_in_db.out.cohort_table_name,
+    //   covariate_specification,
+    //   generate_cohorts_in_db.out.cohort_counts,
+    //   db_jars,
+    //   generate_cohorts_in_db.out.sqlite_db_covariates,
+    //   pheno_label,
+    //   convert_plink,
+    //   phenofile_name
+    // )
   
-    pheno_file_out = generate_phenofile.out.pheno_file
+    //pheno_file_out = generate_phenofile.out.pheno_file
+    pheno_file_out = "out phenofile"
 
   emit:
     pheno_file_out
